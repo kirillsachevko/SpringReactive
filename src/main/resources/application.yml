@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: spring-reactive
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/sportsdb
+    username: postgres
+    password: postgres
+    schema-init:
+      mode: always
+
+  flyway:
+    enable: true
+    url: jdbc:postgresql://localhost:5432/sportsdb
+    user: postgres
+    password: postgres
+
+api:
+  host: app.rakuten.co.jp
+  path: /services/api/IchibaItem/Search/20220601
+  format: json
+  genreId: 555086
+  applicationId: 1054041741056968992
+  elements: itemName
+  getMapping: /api/v1/sport
+  postMapping: /api/v1/sport/{sportName}
