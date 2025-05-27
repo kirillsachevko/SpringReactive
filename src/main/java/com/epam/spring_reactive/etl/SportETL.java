@@ -9,10 +9,12 @@ import com.google.gson.JsonObject;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.Map;
 import java.util.Objects;
 
 import static com.epam.spring_reactive.util.ApplicationConstants.*;
@@ -43,10 +45,7 @@ public class SportETL {
                         .scheme(URL_SCHEME)
                         .host(properties.getHost())
                         .path(properties.getPath())
-                        .queryParam(FORMAT_PARAMETER, properties.getFormat())
-                        .queryParam(GENRE_ID_PARAMETER, properties.getGenreId())
-                        .queryParam(APPLICATION_ID_PARAMETER, properties.getApplicationId())
-                        .queryParam(ELEMENTS_PARAMETER, properties.getElements())
+                        .queryParams(populateRequestParams())
                         .build())
                 .retrieve()
                 .bodyToMono(String.class)
@@ -69,7 +68,7 @@ public class SportETL {
                         JsonObject itemObject = item.getAsJsonObject().get(ITEM_PROPERTY).getAsJsonObject();
                         if (!itemObject.isJsonNull() && itemObject.getAsJsonObject().has(ITEM_NAME_PROPERTY)) {
                             String name = itemObject.get(ITEM_NAME_PROPERTY).getAsString();
-                            System.out.println(name);
+                            log.info(name);
                             return Sport.builder()
                                     .name(name)
                                     .build();
@@ -78,6 +77,11 @@ public class SportETL {
                     return null;
                 })
                 .filter(Objects::nonNull);
+    }
+
+    private MultiValueMap<String, String> populateRequestParams() {
+        return MultiValueMap.fromSingleValue(Map.of(FORMAT_PARAMETER, properties.getFormat(), GENRE_ID_PARAMETER, properties.getGenreId(),
+                APPLICATION_ID_PARAMETER, properties.getApplicationId(), ELEMENTS_PARAMETER, properties.getElements()));
     }
 
     private JsonArray extractArray(JsonObject json, String property) {
